@@ -5,6 +5,10 @@ Pascal triangle formation
 
 
 def pascal_triangle(n):
+    """
+    Pascal triangle functon defination
+    arg: n : This is is the positve integer being passed on
+    """
     if n <= 0:
         return []
 
