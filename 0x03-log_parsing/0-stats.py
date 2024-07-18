@@ -1,75 +1,50 @@
 #!/usr/bin/python3
+"""log parsing module"""
 import sys
+import re
 import signal
-
-total_file_size = 0
-status_codes_count = {
-    200: 0,
-    301: 0,
-    400: 0,
-    401: 0,
-    403: 0,
-    404: 0,
-    405: 0,
-    500: 0
-}
-
-
-def print_stats():
-    """Print statistics about file size and status codes."""
-    print(f"File size: {total_file_size}")
-    for code in sorted(status_codes_count):
-        if status_codes_count[code] > 0:
-            print(f"{code}: {status_codes_count[code]}")
 
 
 def signal_handler(sig, frame):
-    """Handle signal interrupts to print stats before exiting."""
-    print_stats()
-    sys.exit(0)
+    """sigint handler"""
+    sys.exit()
 
 
 signal.signal(signal.SIGINT, signal_handler)
+reg_exp = r"[\d\.]+[]\d\-\.:\s[]+\"GET /projects/260 HTTP/1.1\"[\d\s]+"
+allowed_code = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+file_size = 0
+groups = 0
+total_lines = 0
+try:
+    for line in sys.stdin:
+        gateman = re.match(reg_exp, line)
+        '''if line doesn't match regex expression, skip it'''
+        if gateman.group(0) == line:
+            total_lines += 1
+            file_size += int(line.split()[-1])
+            status_code = line.split()[-2]
+            if int(status_code) in allowed_code:
+                allowed_code[int(status_code)] += 1
 
-line_count = 0
-
-
-def process_line(line):
-    """Process a line of log input."""
-    global total_file_size, line_count
-
-    try:
-        parts = line.split()
-        if len(parts) < 10:
-            return
-
-        ip_address = parts[0]
-        date = parts[3][1:]
-        request = parts[5] + " " + parts[6] + " " + parts[7]
-        status_code = int(parts[8])
-        file_size = int(parts[9])
-
-        if request != '"GET /projects/260 HTTP/1.1"':
-            return
-
-        total_file_size += file_size
-        if status_code in status_codes_count:
-            status_codes_count[status_code] += 1
-
-        line_count += 1
-
-        if line_count % 10 == 0:
-            print_stats()
-
-    except Exception as e:
-        print(f"Error processing line: {line}")
-        print(e)
-
-
-print("Starting to process input...")
-for line in sys.stdin:
-    print(f"Processing line: {line.strip()}")
-    process_line(line.strip())
-
-print_stats()
-
+        if (total_lines % 10 == 0):
+            '''keep track of how many batches I have printed.
+            a bug could occur if I have e.g 21 total lines but I only handle
+            batces of 10, where will the last item go as 21 % 10 is not 0?.
+            After stdin, check if I left out any bits and print them as they
+            most certainly are not above 10 mathematically.
+            '''
+            groups += 1
+            print("File size:", file_size)
+            for key, value in allowed_code.items():
+                if value > 0:
+                    print("{}: {}".format(key, value))
+    pending_items = total_lines - (groups * 10)
+    if pending_items != 0:
+        print("File size:", file_size)
+        for key, value in allowed_code.items():
+            if value > 0:
+                print("{}: {}".format(key, value))
+except KeyboardInterrupt:
+    # print("KeyboardInterrupt")
+    signal_handler(signal.SIGINT, None)
