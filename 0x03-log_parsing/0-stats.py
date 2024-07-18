@@ -70,3 +70,4 @@ for line in sys.stdin:
     process_line(line.strip())
 
 print_stats()
+
