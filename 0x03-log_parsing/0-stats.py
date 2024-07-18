@@ -16,6 +16,7 @@ status_codes_count = {
 
 
 def print_stats():
+    """Print statistics about file size and status codes."""
     print(f"File size: {total_file_size}")
     for code in sorted(status_codes_count):
         if status_codes_count[code] > 0:
@@ -23,6 +24,7 @@ def print_stats():
 
 
 def signal_handler(sig, frame):
+    """Handle signal interrupts to print stats before exiting."""
     print_stats()
     sys.exit(0)
 
@@ -31,11 +33,15 @@ signal.signal(signal.SIGINT, signal_handler)
 
 line_count = 0
 
-for line in sys.stdin:
+
+def process_line(line):
+    """Process a line of log input."""
+    global total_file_size, line_count
+
     try:
         parts = line.split()
         if len(parts) < 10:
-            continue
+            return
 
         ip_address = parts[0]
         date = parts[3][1:]
@@ -44,7 +50,7 @@ for line in sys.stdin:
         file_size = int(parts[9])
 
         if request != '"GET /projects/260 HTTP/1.1"':
-            continue
+            return
 
         total_file_size += file_size
         if status_code in status_codes_count:
@@ -56,6 +62,11 @@ for line in sys.stdin:
             print_stats()
 
     except Exception as e:
-        continue
+        print(f"Error processing line: {line}")
+        print(e)
+
+
+for line in sys.stdin:
+    process_line(line.strip())
 
 print_stats()
