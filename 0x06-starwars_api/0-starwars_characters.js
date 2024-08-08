@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 const request = require('request');
 
@@ -26,7 +26,7 @@ request(apiUrl, (error, response, body) => {
       return new Promise((resolve, reject) => {
         request(url, (error, response, body) => {
           if (error) {
-            reject('Error fetching character data:', error);
+            reject(new Error('Error fetching character data: ' + error));
             return;
           }
 
@@ -35,7 +35,7 @@ request(apiUrl, (error, response, body) => {
             console.log(characterData.name);
             resolve();
           } else {
-            reject('Failed to fetch character data');
+            reject(new Error('Failed to fetch character data'));
           }
         });
       });
