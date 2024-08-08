@@ -35,7 +35,8 @@ def validate_continuation_byte(data: List[int]) -> bool:
 
 
 def validUTF8(data: List[int]) -> bool:
-    '''Determines if a given data set represents a valid UTF-8 encoding'''
+    '''
+    Determines if a given data set represents a valid UTF-8 encoding'''
     while data:
         byte = data.pop(0)
         if byte > 255:
