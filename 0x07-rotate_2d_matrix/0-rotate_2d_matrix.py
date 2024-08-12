@@ -23,4 +23,3 @@ def rotate_2d_matrix(matrix):
     transpose(matrix)
     for i in range(len(matrix)):
         matrix[i].reverse()
-    return matrix
