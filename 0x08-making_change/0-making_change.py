@@ -1,9 +1,14 @@
+#!/usr/bin/python3
+"""0. Change comes from within
+"""
+
+
 def makeChange(coins, total):
-    # If the total is 0 or less, no coins are needed
+    """If the total is 0 or less, no coins are needed
+    """
     if total <= 0:
         return 0
 
-    # Initialize the dp array with a large value (inf)
     dp = [float('inf')] * (total + 1)
 
     # Base case: 0 coins are needed to make 0 total
