@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+"""0x09-island_perimeter"""
+
+
 def island_perimeter(grid):
     """
     function def island_perimeter(grid):
